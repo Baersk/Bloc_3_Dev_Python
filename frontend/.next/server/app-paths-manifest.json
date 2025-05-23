@@ -1,11 +1,11 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/connexion/page": "app/connexion/page.js",
+  "/employe/page": "app/employe/page.js",
+  "/offres/page": "app/offres/page.js",
   "/admin/page": "app/admin/page.js",
   "/inscription/page": "app/inscription/page.js",
-  "/offres/page": "app/offres/page.js",
-  "/employe/page": "app/employe/page.js",
   "/profil/page": "app/profil/page.js",
-  "/page": "app/page.js",
-  "/panier/page": "app/panier/page.js"
+  "/panier/page": "app/panier/page.js",
+  "/page": "app/page.js"
 }

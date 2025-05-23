@@ -1,11 +1,11 @@
 {
   "/_not-found/page": "/_not-found",
   "/connexion/page": "/connexion",
+  "/employe/page": "/employe",
+  "/offres/page": "/offres",
   "/admin/page": "/admin",
   "/inscription/page": "/inscription",
-  "/offres/page": "/offres",
-  "/employe/page": "/employe",
   "/profil/page": "/profil",
-  "/page": "/",
-  "/panier/page": "/panier"
+  "/panier/page": "/panier",
+  "/page": "/"
 }
