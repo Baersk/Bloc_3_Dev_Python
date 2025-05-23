@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
 import './styles.css';
 
 // Configuration Supabase
@@ -17,27 +18,34 @@ export default function Connexion() {
 
   const handleSubmit = async () => {
     try {
-      // 🔎 Vérification des identifiants dans la table `utilisateurs`
+      // 🔎 Récupérer l'utilisateur et le mot de passe hashé
       const { data, error } = await supabase
         .from('utilisateurs')
-        .select('id, role')
+        .select('id, role, mot_de_passe')
         .eq('email', email)
-        .eq('mot_de_passe', password) // ⚠️ DOIT ÊTRE HASHÉ en base de données !
         .single();
 
-      if (error || !data) {
+      if (!data || error) {
         alert('❌ Identifiants invalides');
+        return;
+      }
+
+      // ✅ Comparer le mot de passe entré avec le hash en base
+      const passwordMatch = await bcrypt.compare(password, data.mot_de_passe);
+      if (!passwordMatch) {
+        alert('❌ Mot de passe incorrect');
         return;
       }
 
       // 📌 Stocker l’utilisateur en local
       localStorage.setItem('userId', data.id);
       localStorage.setItem('role', data.role);
-
+      
       // 🔄 Redirection après connexion
       const searchParams = new URLSearchParams(window.location.search);
       const redirect = searchParams.get('redirect') || '/';
       router.push(redirect);
+
     } catch (err) {
       alert('❌ Erreur lors de la connexion');
       console.error(err);
