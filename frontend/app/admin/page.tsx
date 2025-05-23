@@ -58,15 +58,16 @@ export default function Admin() {
     if (error) {
       console.error('Erreur fetching utilisateurs:', error);
     } else {
-      const employes = data.filter((u) => u.role === 'employe');
+      // On filtre pour ne garder que les utilisateurs avec le rôle "employe"
+      const employes = data.filter((u: any) => u.role === 'employe');
       setUtilisateurs(employes);
     }
   };
 
-  // Effet initial
+  // Effet initial : Vérification du rôle admin
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    if (role !== 'admin') {
+    const storedRole = localStorage.getItem('role') || '';
+    if (storedRole.trim().toLowerCase() !== 'admin') {
       alert('Accès non autorisé');
       window.location.href = '/';
       return;
@@ -88,9 +89,9 @@ export default function Admin() {
 
   // Ajouter une offre
   const handleAjouterOffre = async () => {
-    const { error } = await supabase.from('offres').insert([
-      { nom, description, prix, capacite },
-    ]);
+    const { error } = await supabase
+      .from('offres')
+      .insert([{ nom, description, prix, capacite }]);
     if (!error) {
       setMessage('🟢 Offre ajoutée avec succès');
       fetchOffres();
@@ -99,7 +100,7 @@ export default function Admin() {
       setPrix(0);
       setCapacite(1);
     } else {
-      setMessage('🔴 Erreur lors de l\'ajout');
+      setMessage("🔴 Erreur lors de l'ajout");
     }
   };
 
@@ -127,7 +128,7 @@ export default function Admin() {
       setEmailEmploye('');
       setPasswordEmploye('');
     } else {
-      setMsgEmploye('🔴 Erreur lors de l\'ajout');
+      setMsgEmploye("🔴 Erreur lors de l'ajout");
     }
   };
 
@@ -163,7 +164,9 @@ export default function Admin() {
         <textarea className="input-field" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
         <input className="input-field" type="number" placeholder="Prix (€)" value={prix} onChange={(e) => setPrix(parseFloat(e.target.value))} />
         <input className="input-field" type="number" placeholder="Capacité" value={capacite} onChange={(e) => setCapacite(parseInt(e.target.value))} />
-        <button className="btn btn-add" onClick={handleAjouterOffre}>Ajouter Offre</button>
+        <button className="btn btn-add" onClick={handleAjouterOffre}>
+          Ajouter Offre
+        </button>
         {message && <p className="message">{message}</p>}
       </section>
 
@@ -171,14 +174,23 @@ export default function Admin() {
       <h2>Liste des Employés</h2>
       {utilisateurs.map((u) => (
         <div key={u.id} className="user-item">
-          <p>{u.nom} {u.prenom} - {u.email}</p>
-          <button className="btn btn-delete" onClick={() => handleSupprimerUtilisateur(u.id)}>Supprimer</button>
+          <p>
+            {u.nom} {u.prenom} - {u.email}
+          </p>
+          <button className="btn btn-delete" onClick={() => handleSupprimerUtilisateur(u.id)}>
+            Supprimer
+          </button>
         </div>
       ))}
 
       <h2>📝 Ajouter un Employé</h2>
       <input className="input-field" placeholder="Nom" value={nomEmploye} onChange={(e) => setNomEmploye(e.target.value)} />
-      <button className="btn btn-add" onClick={handleAjoutEmploye}>Ajouter Employé</button>
+      <input className="input-field" placeholder="Prénom" value={prenomEmploye} onChange={(e) => setPrenomEmploye(e.target.value)} />
+      <input className="input-field" placeholder="Email" value={emailEmploye} onChange={(e) => setEmailEmploye(e.target.value)} />
+      <button className="btn btn-add" onClick={handleAjoutEmploye}>
+        Ajouter Employé
+      </button>
+      {msgEmploye && <p className="message">{msgEmploye}</p>}
     </div>
   );
 }
