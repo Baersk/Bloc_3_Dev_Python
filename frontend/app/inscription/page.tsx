@@ -18,27 +18,31 @@ export default function Inscription() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    fetch('http://127.0.0.1:5000/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.message) {
-          setMessage('Inscription réussie ! Veuillez vous connecter.');
-          // Optionnel : redirection vers la page de connexion après quelques secondes
-          setTimeout(() => {
-            router.push('/connexion');
-          }, 2000);
-        } else {
-          setMessage('Erreur : ' + (data.error || ''));
-        }
-      })
-      .catch(() => setMessage('Erreur de communication avec le serveur.'));
+    try {
+      const response = await fetch('https://bloc-3-dev-python.onrender.com/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      
+      const data = await response.json();
+      
+      if (data.message) {
+        setMessage('Inscription réussie ! Veuillez vous connecter.');
+        // Redirection vers la page de connexion après quelques secondes
+        setTimeout(() => {
+          router.push('/connexion');
+        }, 2000);
+      } else {
+        setMessage('Erreur : ' + (data.error || ''));
+      }
+    } catch (error) {
+      console.error('Erreur de communication avec le serveur:', error);
+      setMessage('Erreur de communication avec le serveur.');
+    }
   };
 
   return (

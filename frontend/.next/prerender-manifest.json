@@ -1,6 +1,30 @@
 {
   "version": 4,
   "routes": {
+    "/panier": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/panier",
+      "dataRoute": "/panier.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/connexion": {
       "experimentalBypassFor": [
         {
@@ -25,7 +49,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/inscription": {
+    "/admin": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -38,8 +62,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/inscription",
-      "dataRoute": "/inscription.rsc",
+      "srcRoute": "/admin",
+      "dataRoute": "/admin.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -97,7 +121,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/panier": {
+    "/inscription": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -110,8 +134,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/panier",
-      "dataRoute": "/panier.rsc",
+      "srcRoute": "/inscription",
+      "dataRoute": "/inscription.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -136,30 +160,6 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/",
       "dataRoute": "/index.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/admin": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/admin",
-      "dataRoute": "/admin.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -197,8 +197,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "a1250e4360ced3e3b6f02dc1bc8aec9b",
-    "previewModeSigningKey": "42f3f3fd42b282b19de9c434fdfd58f9aa42a7de06fc403842934e32d4498d0f",
-    "previewModeEncryptionKey": "2e1f7b331f0532387e80a59efd3c3bd9b6ddd38328310548e0714e856dc25aad"
+    "previewModeId": "cb3540cdb2e6ebc43bbbe5012b3c0b45",
+    "previewModeSigningKey": "76feaf5a70902311cfa1429589a8a3fed4ccf9fdcbb88b3a87061a36608d4a53",
+    "previewModeEncryptionKey": "df6adabadaa1493bddb090b88fa962eb3404be7b50a41e4e54c33a562f9c55ac"
   }
 }

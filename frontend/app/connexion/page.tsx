@@ -14,7 +14,7 @@ export default function Connexion() {
     e.preventDefault();
 
     try {
-      const response = await fetch('https://votre-backend-api.com/login', {
+      const response = await fetch('https://bloc-3-dev-python.onrender.com/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // Envoie l'email et le mot_de_passe au backend
@@ -23,11 +23,12 @@ export default function Connexion() {
       const data = await response.json();
 
       if (response.ok) {
-        // Stocker le token et d'autres infos (ID, rôle, etc.) localement
+        // Stocke le token et d'autres informations (ID, rôle, etc.) localement
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.user_id);
         localStorage.setItem('role', data.role);
-        router.push('/'); // Redirection vers la page d'accueil ou dashboard
+        // Redirection vers la page d'accueil ou le dashboard
+        router.push('/');
       } else {
         setErrorMessage(data.error || 'Erreur lors de la connexion');
       }

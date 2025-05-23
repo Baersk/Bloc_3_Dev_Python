@@ -5,7 +5,7 @@
   "/admin/page": "app/admin/page.js",
   "/inscription/page": "app/inscription/page.js",
   "/page": "app/page.js",
+  "/offres/page": "app/offres/page.js",
   "/panier/page": "app/panier/page.js",
-  "/profil/page": "app/profil/page.js",
-  "/offres/page": "app/offres/page.js"
+  "/profil/page": "app/profil/page.js"
 }

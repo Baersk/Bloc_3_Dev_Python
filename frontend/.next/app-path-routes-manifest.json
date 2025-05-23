@@ -5,7 +5,7 @@
   "/admin/page": "/admin",
   "/inscription/page": "/inscription",
   "/page": "/",
+  "/offres/page": "/offres",
   "/panier/page": "/panier",
-  "/profil/page": "/profil",
-  "/offres/page": "/offres"
+  "/profil/page": "/profil"
 }
