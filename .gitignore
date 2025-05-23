@@ -12,7 +12,6 @@ debug.log         # Fichier de debug éventuel
 .env.local        # Version locale de l'environnement (si utilisée)
 .idea/            # Configurations IDE (PyCharm, WebStorm, etc.)
 .vscode/          # Configurations VS Code
-.next/
 /database/dump_inserts.sql
 .vercel
 =======
@@ -32,7 +31,6 @@ debug.log         # Fichier de debug éventuel
 /coverage
 
 # next.js
-/.next/
 /out/
 
 # production
