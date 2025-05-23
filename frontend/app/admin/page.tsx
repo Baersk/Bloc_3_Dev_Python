@@ -52,21 +52,22 @@ export default function Admin() {
     }
   };
 
-  // Charger les utilisateurs
+  // Charger les utilisateurs (employés)
   const fetchUtilisateurs = async () => {
     const { data, error } = await supabase.from('utilisateurs').select('*');
     if (error) {
       console.error('Erreur fetching utilisateurs:', error);
     } else {
-      // On filtre pour ne garder que les utilisateurs avec le rôle "employe"
       const employes = data.filter((u: any) => u.role === 'employe');
       setUtilisateurs(employes);
     }
   };
 
-  // Effet initial : Vérification du rôle admin
+  // Effet initial : vérification de l'accès admin
   useEffect(() => {
     const storedRole = localStorage.getItem('role') || '';
+    console.log('Role from localStorage:', storedRole); // Vérifie le rôle dans la console
+
     if (storedRole.trim().toLowerCase() !== 'admin') {
       alert('Accès non autorisé');
       window.location.href = '/';
@@ -89,9 +90,9 @@ export default function Admin() {
 
   // Ajouter une offre
   const handleAjouterOffre = async () => {
-    const { error } = await supabase
-      .from('offres')
-      .insert([{ nom, description, prix, capacite }]);
+    const { error } = await supabase.from('offres').insert([
+      { nom, description, prix, capacite },
+    ]);
     if (!error) {
       setMessage('🟢 Offre ajoutée avec succès');
       fetchOffres();
