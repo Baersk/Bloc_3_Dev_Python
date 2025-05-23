@@ -19,8 +19,8 @@ const Navbar: React.FC = () => {
   const [panierCount, setPanierCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Vérification du statut utilisateur avec la clé cohérente "userId"
+  // Fonction pour vérifier et mettre à jour l'état d'authentification selon le localStorage
+  const updateAuthState = () => {
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
     if (userId && userRole) {
@@ -31,7 +31,6 @@ const Navbar: React.FC = () => {
       setRole(null);
     }
 
-    // Charger le nombre d’articles dans le panier
     const storedPanier = localStorage.getItem('panier');
     if (storedPanier) {
       const items = JSON.parse(storedPanier);
@@ -40,14 +39,30 @@ const Navbar: React.FC = () => {
       setPanierCount(0);
     }
     setLoading(false);
+  };
+
+  useEffect(() => {
+    // Mise à jour initiale de l'état
+    updateAuthState();
+
+    // Optionnel : écoute des modifications du localStorage (utile si plusieurs onglets changent l'état)
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'userId' || event.key === 'role' || event.key === 'panier') {
+        updateAuthState();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('userId'); // Même clé partout
+    localStorage.removeItem('userId');
     localStorage.removeItem('role');
     localStorage.removeItem('panier');
-    setIsAuth(false);
-    setRole(null);
+    updateAuthState();
   };
 
   if (loading) return null;
@@ -137,7 +152,7 @@ const Navbar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {isAuth ? (
           <>
-            <span style={{ color: '#fff' }}>Connecté: {role}</span>
+            <span style={{ color: '#fff' }}>Connecté : {role}</span>
             <button
               style={{
                 padding: '6px 12px',

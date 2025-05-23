@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import './styles.css';
 
-// Configuration de Supabase (assurez-vous que les variables d'environnement sont définies)
+// Configuration de Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -20,7 +20,7 @@ export default function Connexion() {
     e.preventDefault();
     setErrorMsg('');
 
-    // Utilisation de la méthode signInWithPassword (nouvelle API Supabase Auth)
+    // Utilisation de la méthode signInWithPassword (nouvelle API Supabase)
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
@@ -28,14 +28,32 @@ export default function Connexion() {
 
     if (error) {
       setErrorMsg(error.message);
-    } else {
-      // data contient la session et les informations de l'utilisateur
-      const { session, user } = data;
-      
-      // Par exemple, on peut stocker la session dans le localStorage  
-      localStorage.setItem('supabase.auth.token', JSON.stringify(session));
-      
-      // Redirection après connexion réussie (page d'accueil ou dashboard)
+      return;
+    }
+
+    if (data.session) {
+      // Stockage de la session en option
+      localStorage.setItem('supabase.auth.token', JSON.stringify(data.session));
+
+      // Récupérer l'identifiant de l'utilisateur depuis la session
+      const userId = data.session.user.id;
+      localStorage.setItem('userId', userId);
+
+      // Récupérer la ligne de profile correspondant à cet utilisateur pour obtenir le rôle
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        setErrorMsg(profileError.message);
+        return;
+      } else {
+        localStorage.setItem('role', profile.role);
+      }
+
+      // Redirection vers la page d'accueil ou dashboard
       router.push('/');
     }
   };
