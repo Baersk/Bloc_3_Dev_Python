@@ -1,30 +1,6 @@
 {
   "version": 4,
   "routes": {
-    "/admin": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/admin",
-      "dataRoute": "/admin.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/inscription": {
       "experimentalBypassFor": [
         {
@@ -73,7 +49,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/employe": {
+    "/offres": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -86,8 +62,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/employe",
-      "dataRoute": "/employe.rsc",
+      "srcRoute": "/offres",
+      "dataRoute": "/offres.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -121,7 +97,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/profil": {
+    "/admin": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -134,8 +110,32 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/profil",
-      "dataRoute": "/profil.rsc",
+      "srcRoute": "/admin",
+      "dataRoute": "/admin.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/employe": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/employe",
+      "dataRoute": "/employe.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -169,7 +169,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/offres": {
+    "/profil": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -182,8 +182,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/offres",
-      "dataRoute": "/offres.rsc",
+      "srcRoute": "/profil",
+      "dataRoute": "/profil.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -197,8 +197,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "16f03226dfbf30bf359ac644effef26e",
-    "previewModeSigningKey": "6b76c9b046f99cfb5fc903b7a640c04664839ca5fc312361f193622763671276",
-    "previewModeEncryptionKey": "47f0a26530bc50c3fbbc078c9b2834445d0d33e0d03b8ce4f29060695108e48d"
+    "previewModeId": "d6c835b15d98766aa62c0979b1ba59fe",
+    "previewModeSigningKey": "35116b5955cf2379bc25cea869b79d3ba766a6923b5be8e4b2cd9421544caf4c",
+    "previewModeEncryptionKey": "4cb6c2421e5f2b6ce5636737759da115afec3978605533113f7446e6e56dd555"
   }
 }
