@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
     "jspdf": "^3.0.1",
     "next": "^15.3.2",
     "qrcode": "^1.5.4",

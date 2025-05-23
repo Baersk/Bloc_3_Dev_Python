@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { jsPDF } from 'jspdf';
+import { createClient } from '@supabase/supabase-js';
 import styles from './styles.module.css';
 import Navbar from '../components/Navbar';
 
@@ -14,16 +14,10 @@ interface Offre {
   date_heure: string;
 }
 
-interface Billet {
-  billet_id: number;
-  qr_code_base64: string;
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-interface ReservationResult {
-  reservation_id: number;
-  message: string;
-  billets: Billet[];
-}
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Offres() {
   const [offres, setOffres] = useState<Offre[]>([]);
@@ -33,11 +27,18 @@ export default function Offres() {
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/offres')
-      .then(res => res.json())
-      .then((data: Offre[]) => setOffres(data))
-      .catch(err => console.error('Erreur :', err));
+    async function fetchOffres() {
+      const { data, error } = await supabase.from("offres").select("*");
+      if (error) {
+        console.error("Erreur lors de la récupération des offres:", error);
+        return;
+      }
+      setOffres(data);
+    }
 
+    fetchOffres();
+
+    // Récupération du panier
     const savedPanier = localStorage.getItem('panier');
     if (savedPanier) {
       const parsedPanier: Offre[] = JSON.parse(savedPanier);
@@ -46,6 +47,7 @@ export default function Offres() {
       setTotal(somme);
     }
 
+    // Récupération de l'ID utilisateur et rôle
     const uid = localStorage.getItem('userId');
     const urole = localStorage.getItem('role');
     setUserId(uid);
@@ -59,7 +61,6 @@ export default function Offres() {
       localStorage.setItem('panier', JSON.stringify(nouvelPanier));
       setTotal(prev => prev + Number(offre.prix));
 
-      // ✅ Affichage d'un message de confirmation
       alert("✅ L'offre a été ajoutée à votre panier !");
     } else {
       alert("⚠️ Cette offre est déjà dans votre panier.");
@@ -93,8 +94,7 @@ export default function Offres() {
             <button
               className={`${styles.btn} ${styles['btn-primary']}`}
               onClick={() => {
-                const roleActuel = localStorage.getItem('role');
-                if (!roleActuel || roleActuel !== 'client') {
+                if (!role || role !== 'client') {
                   if (confirm("Vous devez être connecté en tant que client pour réserver. Connectez-vous ou inscrivez-vous.")) {
                     window.location.href = '/connexion';
                   }

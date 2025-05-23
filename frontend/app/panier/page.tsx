@@ -1,8 +1,14 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { jsPDF } from "jspdf";
+import { useEffect, useState } from 'react';
+import { jsPDF } from 'jspdf';
+import { createClient } from '@supabase/supabase-js';
 import './styles.css';
+
+// Configuration Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Article {
   id: number;
@@ -28,69 +34,34 @@ export default function Panier() {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedArticles = localStorage.getItem("panier");
+    const storedArticles = localStorage.getItem('panier');
     if (storedArticles) {
       const parsed: Article[] = JSON.parse(storedArticles);
       setArticles(parsed);
       const sum = parsed.reduce((acc, curr) => acc + Number(curr.prix), 0);
       setTotal(sum);
     }
-    const uid = localStorage.getItem("userId");
+    const uid = localStorage.getItem('userId');
     setUserId(uid);
   }, []);
 
   const retirerArticle = (id: number) => {
     const nouvelleListe = articles.filter((a) => a.id !== id);
     setArticles(nouvelleListe);
-    localStorage.setItem("panier", JSON.stringify(nouvelleListe));
+    localStorage.setItem('panier', JSON.stringify(nouvelleListe));
     const article = articles.find((a) => a.id === id);
     if (article) {
       setTotal((prev) => prev - Number(article.prix));
     }
   };
 
-  const formattedTotal = Number(total).toFixed(2) + " €";
-
-  const createPDF = (reservationsResults: ReservationResult[]) => {
-    const doc = new jsPDF();
-    let yPosition = 10;
-    doc.setFontSize(16);
-    doc.text("Vos E-tickets pour les Jeux Olympiques", 10, yPosition);
-    yPosition += 10;
-
-    reservationsResults.forEach((reservation, index) => {
-      doc.setFontSize(14);
-      doc.text(`Réservation ${index + 1} - ID: ${reservation.reservation_id}`, 10, yPosition);
-      yPosition += 8;
-      doc.setFontSize(12);
-      doc.text(reservation.message, 10, yPosition);
-      yPosition += 8;
-      reservation.billets.forEach((billet) => {
-        const qrImg = "data:image/png;base64," + billet.qr_code_base64;
-        doc.addImage(qrImg, "PNG", 10, yPosition, 50, 50);
-        yPosition += 60;
-        if (yPosition > 250) {
-          doc.addPage();
-          yPosition = 10;
-        }
-      });
-      yPosition += 10;
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 10;
-      }
-    });
-
-    doc.save("etickets.pdf");
-  };
-
   const validerReservation = async () => {
     if (articles.length === 0) {
-      alert("Votre panier est vide.");
+      alert('Votre panier est vide.');
       return;
     }
     if (!userId) {
-      if (confirm("Vous devez être connecté pour réserver. Voulez-vous vous connecter ?")) {
+      if (confirm('Vous devez être connecté pour réserver. Voulez-vous vous connecter ?')) {
         window.location.href = '/connexion';
       }
       return;
@@ -99,35 +70,25 @@ export default function Panier() {
       const reservationsResults: ReservationResult[] = [];
 
       for (const article of articles) {
-        const data = {
-          utilisateur_id: userId,
-          offre_id: article.id,
-          date_heure_event: article.date_heure,
-          nombre_billets: 1
-        };
-        const res = await fetch("http://127.0.0.1:5000/reserver", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        const json = await res.json();
-        if (!res.ok) {
-          throw new Error(json.error || "Erreur lors de la réservation");
+        const { data, error } = await supabase.from('reservations').insert([
+          { utilisateur_id: userId, offre_id: article.id, date_heure_event: article.date_heure, nombre_billets: 1 },
+        ]).select('*').single();
+
+        if (error) {
+          throw new Error(error.message);
         }
-        reservationsResults.push(json);
+
+        reservationsResults.push(data);
       }
 
-      createPDF(reservationsResults);
-      alert("Réservation confirmée ! Retrouvez vos billets dans votre profil.");
-
+      alert('Réservation confirmée ! Retrouvez vos billets dans votre profil.');
       setArticles([]);
-      localStorage.removeItem("panier");
+      localStorage.removeItem('panier');
       setTotal(0);
-
       window.location.href = '/profil';
 
     } catch (err: any) {
-      alert("Erreur lors de la validation de la réservation: " + err.message);
+      alert('Erreur lors de la validation de la réservation: ' + err.message);
     }
   };
 
@@ -149,16 +110,7 @@ export default function Panier() {
             ))}
           </ul>
 
-          <h2 style={{
-            fontSize: '2.5em',
-            fontWeight: 'bold',
-            color: '#0077cc',
-            textAlign: 'center',
-            margin: '20px 0'
-          }}>
-            Total : {formattedTotal}
-          </h2>
-
+          <h2 className="total-price">Total : {Number(total).toFixed(2)} €</h2>
           <button className="btn-valid" onClick={validerReservation}>Valider la réservation</button>
         </>
       )}

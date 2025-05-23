@@ -2,34 +2,40 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 import './styles.css';
+
+// Configuration Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Connexion() {
   const [email, setEmail] = useState('');
-  const [mot_de_passe, setMotDePasse] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleSubmit = () => {
-    fetch('http://127.0.0.1:5000/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, mot_de_passe })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.user_id && data.role) {
-          // Utilisation de "userId" pour la cohérence
-          localStorage.setItem('userId', data.user_id);
-          localStorage.setItem('role', data.role);
-          // Récupérer le paramètre de redirection, s'il existe, sinon rediriger vers la page d'accueil
-          const searchParams = new URLSearchParams(window.location.search);
-          const redirect = searchParams.get("redirect") || '/';
-          router.push(redirect);
-        } else {
-          alert('Erreur : ' + (data.error || 'Informations invalides.'));
-        }
-      })
-      .catch(() => alert('Erreur lors de la connexion'));
+  const handleSubmit = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(`Erreur : ${error.message}`);
+      return;
+    }
+
+    if (data.session) {
+      const user = data.user;
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('role', 'client'); // 🚀 Tu peux récupérer le rôle depuis Supabase si configuré
+
+      // Récupérer le paramètre de redirection, s'il existe
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirect = searchParams.get('redirect') || '/';
+      router.push(redirect);
+    }
   };
 
   return (
@@ -48,8 +54,8 @@ export default function Connexion() {
         <input
           placeholder="Mot de passe"
           type="password"
-          value={mot_de_passe}
-          onChange={(e) => setMotDePasse(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           style={{ padding: '8px', width: '100%' }}
         />
       </div>

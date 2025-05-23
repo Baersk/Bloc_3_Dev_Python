@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import './styles.css';
+
+// Configuration Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Employe() {
   const [codeScan, setCodeScan] = useState('');
@@ -10,72 +16,78 @@ export default function Employe() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const roleLocal = localStorage.getItem('role');
-    if (roleLocal !== 'employe') {
-      alert("Accès non autorisé");
-      window.location.href = '/connexion'; // ou autre page
-      return;
+    async function checkUserRole() {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        alert('Accès non autorisé');
+        window.location.href = '/connexion';
+        return;
+      }
+
+      const { data: userData, error } = await supabase
+        .from('utilisateurs')
+        .select('role')
+        .eq('email', data.session.user.email)
+        .single();
+
+      if (error || userData?.role !== 'employe') {
+        alert('Accès non autorisé');
+        window.location.href = '/connexion';
+        return;
+      }
+
+      setRole(userData.role);
+      setLoading(false);
     }
-    setRole(roleLocal);
-    setLoading(false);
+
+    checkUserRole();
   }, []);
 
-  const verifierBillet = () => {
-    // On envoie le code saisi sous "qr_code" dans le corps de la requête.
-    // Pour le test, assure-toi d'entrer la clef_finale (généralement une chaîne UUID)
-    fetch(`http://127.0.0.1:5000/verifier-billet`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ qr_code: codeScan }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.valide) {
-          setValidationMessage('✅ Billet Valide : ' + data.message);
-        } else {
-          setValidationMessage('❌ Billet Non Valide : ' + data.message);
-        }
-      })
-      .catch(() => {
-        setValidationMessage('Erreur de vérification.');
-      });
+  const verifierBillet = async () => {
+    if (!codeScan.trim()) {
+      setValidationMessage('❌ Veuillez entrer un QR Code.');
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('billets')
+      .select('valide, message')
+      .eq('qr_code_base64', codeScan)
+      .single();
+
+    if (error) {
+      setValidationMessage('❌ Erreur lors de la vérification.');
+      return;
+    }
+
+    if (data?.valide) {
+      setValidationMessage(`✅ Billet Valide : ${data.message}`);
+    } else {
+      setValidationMessage(`❌ Billet Non Valide : ${data?.message || 'Billet inconnu'}`);
+    }
   };
 
   if (loading) return <p>Chargement...</p>;
-
   if (role !== 'employe') return <p>Accès non autorisé</p>;
 
   return (
     <div className="page-container">
       <h1>Scanner et Vérification des billets</h1>
-      
-      {/* Champ de saisie pour scanner */}
+
       <input
         type="text"
-        placeholder="Entrer la clef finale du billet"
+        placeholder="Entrer le QR Code du billet"
         value={codeScan}
         onChange={(e) => setCodeScan(e.target.value)}
-        style={{ width: '80%', padding: '10px', fontSize: '1em', marginBottom: '10px' }}
+        className="input-field"
       />
-      
-      {/* Bouton Vérifier */}
-      <button
-        onClick={verifierBillet}
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#3498db',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-      >
+
+      <button onClick={verifierBillet} className="btn">
         Vérifier
       </button>
-      
-      {/* Message de résultat */}
+
       {validationMessage && (
-        <div style={{ marginTop: '20px', fontSize: '1.2em' }}>
+        <div className={`message ${validationMessage.includes('✅') ? 'message-success' : 'message-error'}`}>
           {validationMessage}
         </div>
       )}
