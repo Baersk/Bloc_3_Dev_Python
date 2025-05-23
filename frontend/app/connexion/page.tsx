@@ -16,25 +16,31 @@ export default function Connexion() {
   const router = useRouter();
 
   const handleSubmit = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // 🔎 Vérification des identifiants dans la table `utilisateurs`
+      const { data, error } = await supabase
+        .from('utilisateurs')
+        .select('id, role')
+        .eq('email', email)
+        .eq('mot_de_passe', password) // ⚠️ DOIT ÊTRE HASHÉ en base de données !
+        .single();
 
-    if (error) {
-      alert(`Erreur : ${error.message}`);
-      return;
-    }
+      if (error || !data) {
+        alert('❌ Identifiants invalides');
+        return;
+      }
 
-    if (data.session) {
-      const user = data.user;
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('role', 'client'); // 🚀 Tu peux récupérer le rôle depuis Supabase si configuré
+      // 📌 Stocker l’utilisateur en local
+      localStorage.setItem('userId', data.id);
+      localStorage.setItem('role', data.role);
 
-      // Récupérer le paramètre de redirection, s'il existe
+      // 🔄 Redirection après connexion
       const searchParams = new URLSearchParams(window.location.search);
       const redirect = searchParams.get('redirect') || '/';
       router.push(redirect);
+    } catch (err) {
+      alert('❌ Erreur lors de la connexion');
+      console.error(err);
     }
   };
 
