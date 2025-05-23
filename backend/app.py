@@ -234,7 +234,7 @@ def login():
     email = data.get('email')
     mot_de_passe_clair = data.get('mot_de_passe')
 
-    # Vérification de la présence
+    # Vérification de la présence des identifiants
     if not email or not mot_de_passe_clair:
         return jsonify({"error": "Email et mot de passe requis"}), 400
 
@@ -250,16 +250,10 @@ def login():
 
     user_id, hash_mdp, role = user
 
-    # Vérification mot de passe hashé
-    if bcrypt.checkpw(mot_de_passe_clair.encode('utf-8'), hash_mdp.encode('utf-8')):
-        # Connexion réussie
-        response = make_response(jsonify({"message": "Connexion réussie", "user_id": user_id, "role": role}))
-        # Ajouter le cookie role (non sécurisé si en clair)
-        response.set_cookie('role', role, path='/', httponly=False)  # httponly=False pour accès côté JS
-        return response
-    else:
+    # Vérification du mot de passe
+    if not bcrypt.checkpw(mot_de_passe_clair.encode('utf-8'), hash_mdp.encode('utf-8')):
         return jsonify({"error": "Mot de passe incorrect"}), 401
-    
+
     # Génération d'un token JWT qui expire dans 12 heures
     token = jwt.encode({
         'user_id': user_id,
@@ -267,13 +261,18 @@ def login():
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=12)
     }, app.config['SECRET_KEY'], algorithm="HS256")
 
-    # Ne retourne jamais le hash, retourne uniquement les informations utiles
-    return jsonify({
+    # Construction de la réponse sans exposer le hash 
+    response = make_response(jsonify({
         "message": "Connexion réussie", 
         "token": token, 
         "user_id": user_id, 
         "role": role
-    })
+    }))
+
+    # Optionnel : ajout d'un cookie pour le role (attention à la sécurité)
+    response.set_cookie('role', role, path='/', httponly=False)
+
+    return response
 
 @app.route('/utilisateurs', methods=['GET'])
 def get_utilisateurs():
