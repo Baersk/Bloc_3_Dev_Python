@@ -1,0 +1,60 @@
+<<<<<<< HEAD
+.env
+venv/
+node_modules/
+__pycache__/      # Cache Python généré automatiquement
+*.pyc             # Fichiers compilés Python
+*.pyo             # Fichiers optimisés Python
+db.sqlite3        # Si tu utilises SQLite en local
+logs/             # Dossier de logs (si tu en as un)
+debug.log         # Fichier de debug éventuel
+.DS_Store         # Fichier système macOS (inutile)
+.env.local        # Version locale de l'environnement (si utilisée)
+.idea/            # Configurations IDE (PyCharm, WebStorm, etc.)
+.vscode/          # Configurations VS Code
+.next/
+/database/dump_inserts.sql
+.vercel
+=======
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+>>>>>>> 57a8f061f6181f9a8bd2cef807a2b2f26a7e6063
