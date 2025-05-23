@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import './styles.css';
 
-// Configuration de Supabase (assure-toi que NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont définis)
+// Configuration Supabase : assurez-vous que NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont définis
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -28,21 +28,30 @@ export default function Inscription() {
 
     if (error) {
       setErrorMsg(error.message);
-    } else if (data.user) {
-      // Insertion dans la table profiles avec le rôle par défaut "client"
-      const { error: profileError } = await supabase.from('profiles').insert([
+      return;
+    }
+
+    if (data.user) {
+      // Insertion dans la table utilisateurs en utilisant l'ID généré par Supabase Auth.
+      // Les colonnes 'nom', 'prenom' et 'clef_utilisateur' sont ici renseignées avec une valeur par défaut.
+      const { error: utilisateurError } = await supabase.from('utilisateurs').insert([
         {
-          id: data.user.id,
-          role: 'client',
+          id: data.user.id,               // L’identifiant de Supabase Auth
+          email: email.trim(),            // L'email inscrit
+          nom: '',                        // Par défaut vide, à compléter selon vos besoins
+          prenom: '',                     // Par défaut vide
+          clef_utilisateur: '',           // Par défaut vide (vous pouvez générer une clé unique si souhaité)
+          role: 'client',                 // Rôle par défaut
         },
       ]);
 
-      if (profileError) {
-        setErrorMsg(profileError.message);
-      } else {
-        // Redirection vers la page de connexion après inscription réussie
-        router.push('/connexion');
+      if (utilisateurError) {
+        setErrorMsg(utilisateurError.message);
+        return;
       }
+
+      // Redirection vers la page de connexion après une inscription réussie
+      router.push('/connexion');
     }
   };
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import './styles.css';
 
-// Configuration de Supabase
+// Configuration de Supabase : assurez-vous que NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont définis
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -20,7 +20,7 @@ export default function Connexion() {
     e.preventDefault();
     setErrorMsg('');
 
-    // Utilisation de la méthode signInWithPassword (nouvelle API Supabase)
+    // Utilisation de la méthode signInWithPassword de Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
@@ -32,28 +32,28 @@ export default function Connexion() {
     }
 
     if (data.session) {
-      // Stockage de la session en option
+      // On stocke la session (optionnel)
       localStorage.setItem('supabase.auth.token', JSON.stringify(data.session));
 
-      // Récupérer l'identifiant de l'utilisateur depuis la session
+      // Récupération de l'ID de l'utilisateur provenant de Supabase Auth
       const userId = data.session.user.id;
       localStorage.setItem('userId', userId);
 
-      // Récupérer la ligne de profile correspondant à cet utilisateur pour obtenir le rôle
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
+      // On interroge désormais la table 'utilisateurs' pour obtenir le rôle, etc.
+      const { data: utilisateurData, error: utilisateurError } = await supabase
+        .from('utilisateurs')
         .select('role')
         .eq('id', userId)
         .single();
 
-      if (profileError) {
-        setErrorMsg(profileError.message);
+      if (utilisateurError) {
+        setErrorMsg(utilisateurError.message);
         return;
       } else {
-        localStorage.setItem('role', profile.role);
+        localStorage.setItem('role', utilisateurData.role);
       }
 
-      // Redirection vers la page d'accueil ou dashboard
+      // Redirection vers la page d'accueil ou un dashboard
       router.push('/');
     }
   };
