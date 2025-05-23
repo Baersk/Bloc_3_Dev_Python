@@ -2,91 +2,81 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs';
 import './styles.css';
-
-// Configuration Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Connexion() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     try {
-      // 🔎 Récupérer l'utilisateur et le mot de passe hashé
-      const { data, error } = await supabase
-        .from('utilisateurs')
-        .select('id, role, mot_de_passe')
-        .eq('email', email)
-        .single();
+      const response = await fetch('https://votre-backend-api.com/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // Envoie l'email et le mot_de_passe au backend
+        body: JSON.stringify({ email: email.trim(), mot_de_passe: password })
+      });
+      const data = await response.json();
 
-      if (!data || error) {
-        alert('❌ Identifiants invalides');
-        return;
+      if (response.ok) {
+        // Stocker le token et d'autres infos (ID, rôle, etc.) localement
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.user_id);
+        localStorage.setItem('role', data.role);
+        router.push('/'); // Redirection vers la page d'accueil ou dashboard
+      } else {
+        setErrorMessage(data.error || 'Erreur lors de la connexion');
       }
-
-      // ✅ Comparer le mot de passe entré avec le hash en base
-      const passwordMatch = await bcrypt.compare(password, data.mot_de_passe);
-      if (!passwordMatch) {
-        alert('❌ Mot de passe incorrect');
-        return;
-      }
-
-      // 📌 Stocker l’utilisateur en local
-      localStorage.setItem('userId', data.id);
-      localStorage.setItem('role', data.role);
-      
-      // 🔄 Redirection après connexion
-      const searchParams = new URLSearchParams(window.location.search);
-      const redirect = searchParams.get('redirect') || '/';
-      router.push(redirect);
-
     } catch (err) {
-      alert('❌ Erreur lors de la connexion');
-      console.error(err);
+      console.error('Erreur côté client:', err);
+      setErrorMessage('Erreur de communication avec le serveur.');
     }
   };
 
   return (
     <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto', marginTop: '100px' }}>
       <h2>Se connecter</h2>
-      <div style={{ marginBottom: '10px' }}>
-        <input
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ padding: '8px', width: '100%' }}
-        />
-      </div>
-      <div style={{ marginBottom: '10px' }}>
-        <input
-          placeholder="Mot de passe"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ padding: '8px', width: '100%' }}
-        />
-      </div>
-      <button
-        onClick={handleSubmit}
-        style={{
-          width: '100%',
-          padding: '10px',
-          backgroundColor: '#0077cc',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-      >
-        Se connecter
-      </button>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ padding: '8px', width: '100%' }}
+            required
+          />
+        </div>
+        <div style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Mot de passe"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ padding: '8px', width: '100%' }}
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#0077cc',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Se connecter
+        </button>
+      </form>
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   );
 }

@@ -8,11 +8,16 @@ import base64
 import bcrypt
 from flask_cors import CORS
 import uuid
+import jwt
+import datetime
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# Définit une clé secrète pour JWT (à conserver de façon sécurisée)
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "votre-cle-secrete")
 
 def get_connexion():
     database_url = os.getenv("DATABASE_URL")
@@ -254,6 +259,21 @@ def login():
         return response
     else:
         return jsonify({"error": "Mot de passe incorrect"}), 401
+    
+    # Génération d'un token JWT qui expire dans 12 heures
+    token = jwt.encode({
+        'user_id': user_id,
+        'role': role,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=12)
+    }, app.config['SECRET_KEY'], algorithm="HS256")
+
+    # Ne retourne jamais le hash, retourne uniquement les informations utiles
+    return jsonify({
+        "message": "Connexion réussie", 
+        "token": token, 
+        "user_id": user_id, 
+        "role": role
+    })
 
 @app.route('/utilisateurs', methods=['GET'])
 def get_utilisateurs():
